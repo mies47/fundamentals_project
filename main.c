@@ -49,6 +49,33 @@ struct problem * Linked_Rand(struct problem * str){//Choose a random problem
     }
     return temp;
 }
+struct problem * delete_node(struct problem *str , struct problem *mem){
+    struct problem *temp = NULL;
+    temp = str;
+    if(mem == str){//delete the first node
+        temp = str->next;
+        free(str);
+        return temp;
+    } else{
+        while (temp->next != mem){
+            temp = temp->next;
+        }
+        temp->next = mem->next;
+        free(mem);
+    }
+    return str;
+}
+struct problem * Check_cnt(struct problem *str){//check for 0 problem possibility
+    struct problem *temp = NULL;
+    temp = str;
+    while (temp!=NULL){
+        if(temp->possibility == 0){
+            return temp;
+        }
+        temp = temp->next;
+    }
+    return NULL;
+}
 int main() {
     char name[20];
     char Address_prob[20];
@@ -58,7 +85,6 @@ int main() {
         printf("Couldn't Find The Valid Files");
         exit(-1);
     }
-
     printf("Please enter your name:");
     gets(name);
     printf("Please choose :\n");
@@ -67,7 +93,10 @@ int main() {
     int strchoose;
     scanf("%d" , &strchoose);
     if(strchoose == 1){
-        int problem_count = 0;
+        int people_effect = 50;
+        int court_effect = 50;
+        int treasury_effect = 50;
+        double average_effect = 50;
         struct problem *head;
         head = create_node();
         struct problem* holder;
@@ -96,11 +125,7 @@ int main() {
             while (holder->next != NULL){//Change holder to the last node
                 holder = holder->next;
             }
-
-
-            problem_count++;
         }
-
     }else if(strchoose == 2){
 
     }
