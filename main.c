@@ -1,6 +1,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
+#include <time.h>
 struct problem{
     char prob_def[200];
     char first_dec[200];
@@ -29,6 +30,25 @@ void Add_end(struct problem *head , struct problem *new_node){
     temp->next = new_node;
     new_node->next = NULL;
 }
+int linked_num(struct problem * str){//Check the number of remained problems
+    int cnt = 0;
+    while(str != NULL){
+        str = str->next;
+        cnt++;
+    }
+    return cnt;
+}
+struct problem * Linked_Rand(struct problem * str){//Choose a random problem
+    struct problem *temp;
+    temp = str;
+    int cnt = linked_num(str);
+    srand(time(NULL));
+    int Rand = ((int)rand())%cnt;
+    for (int i = 0; i < Rand ; ++i) {
+        temp = temp->next;
+    }
+    return temp;
+}
 int main() {
     char name[20];
     char Address_prob[20];
@@ -55,14 +75,11 @@ int main() {
         for (int i = 1; !feof(choices) ; ++i) {
             fscanf(choices , "%s" , Address_prob);//Getting c[i].txt from CHOICES.txt
             FILE * Main_File;
-            //char Add[54] = "C:\\Users\\behesht\\CLionProjects\\C_Final_Project\\";
-            //strcat(Add , Address_prob);
-            //Add[53] = '\0';
             Main_File = fopen(Address_prob , "r");
             if(Main_File == NULL){
                 printf("No file found");
             }
-            while (1){//Entering information from files to link list
+            while (1){//Fetching information from files to link list
                 fgets(holder->prob_def , 200 , Main_File);
                 fgets(holder->first_dec , 200 , Main_File);
                 fscanf(Main_File , "%d" , &(holder->fp));
@@ -75,11 +92,12 @@ int main() {
                 holder->possibility = 3;
                 break;
             }
-            printf("%s" , holder->prob_def);
             Add_end(head , create_node());//Add another node to the end for next problem
             while (holder->next != NULL){//Change holder to the last node
                 holder = holder->next;
             }
+
+
             problem_count++;
         }
 
