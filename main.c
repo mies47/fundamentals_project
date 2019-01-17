@@ -33,7 +33,7 @@ int main() {
     char name[20];
     char Address_prob[20];
     FILE *choices;
-    choices = fopen("C:\\Users\\behesht\\CLionProjects\\C_Final_Project\\CHOICES.txt" , "r");
+    choices = fopen("CHOICES.txt" , "r");
     if(choices == NULL){
         printf("Couldn't Find The Valid Files");
         exit(-1);
@@ -53,12 +53,15 @@ int main() {
         struct problem* holder;
         holder = head;
         for (int i = 1; !feof(choices) ; ++i) {
-            fgets(Address_prob , 20 , choices);//Getting c[i].txt from CHOICES.txt
+            fscanf(choices , "%s" , Address_prob);//Getting c[i].txt from CHOICES.txt
             FILE * Main_File;
-            char Add[54] = "C:\\Users\\behesht\\CLionProjects\\C_Final_Project\\";
-            strcat(Add , Address_prob);
-            Add[53] = '\0';
-            Main_File = fopen(Add , "r");
+            //char Add[54] = "C:\\Users\\behesht\\CLionProjects\\C_Final_Project\\";
+            //strcat(Add , Address_prob);
+            //Add[53] = '\0';
+            Main_File = fopen(Address_prob , "r");
+            if(Main_File == NULL){
+                printf("No file found");
+            }
             while (1){//Entering information from files to link list
                 fgets(holder->prob_def , 200 , Main_File);
                 fgets(holder->first_dec , 200 , Main_File);
@@ -72,6 +75,7 @@ int main() {
                 holder->possibility = 3;
                 break;
             }
+            printf("%s" , holder->prob_def);
             Add_end(head , create_node());//Add another node to the end for next problem
             while (holder->next != NULL){//Change holder to the last node
                 holder = holder->next;
