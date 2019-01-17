@@ -39,7 +39,7 @@ int main() {
         exit(-1);
     }
 
-    printf("Please enter your name :");
+    printf("Please enter your name:");
     gets(name);
     printf("Please choose :\n");
     printf("[1]Start a new game\n");
