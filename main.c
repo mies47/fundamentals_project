@@ -56,6 +56,7 @@ int linked_num(struct problem * str){//Check the number of remained problems
         str = str->next;
         cnt++;
     }
+    cnt--;//cnt was increased one extra
     return cnt;
 }
 struct problem * Linked_Rand(struct problem * str){//Choose a random problem
@@ -97,11 +98,46 @@ struct problem * Check_cnt(struct problem *str){//check for 0 problem possibilit
     return NULL;
 }
 
-void My_exit(int ex){
-    if(ex == -1){
-        printf("Do you want to save the game?\n[1]Yes\n[2]No\n");
+
+int * Arr_possibility(struct problem *head){//save problem possibility in an Array for save
+    int size = linked_num(head);
+    int *Arr_poss;
+    Arr_poss = malloc(sizeof(int) * size);
+    struct problem *temp = NULL;
+    temp = head;
+    for (int i = 0; temp != NULL ; ++i) {
+        Arr_poss[i] = temp->possibility;
+        temp = temp->next;
+    }
+    return Arr_poss;
+}
+void Game_save(char *user_name , struct problem *head, int status , int people , int court , int treasure){
+    FILE *save;
+    char Add[strlen(user_name) + 5];
+    char plus[] = ".bin";
+    strcat(Add , plus);
+    save = fopen(Add , "wb+");
+    int *remain = Arr_possibility(head);
+    fwrite(user_name , sizeof(char *) , 1 , save);
+    fwrite(&status , sizeof(int) , 1 ,save);
+    fwrite(remain , sizeof(int *) , 1 ,save);
+    fwrite(&people , sizeof(int) , 1 , save);
+    fwrite(&court , sizeof(int) , 1 , save);
+    fwrite(&treasure , sizeof(int) , 1 ,save);
+    fclose(save);
+}
+void My_exit(char *user_name , struct problem *head, int status , int people , int court , int treasure , int F_choice){
+    if(F_choice == 1){
+        Game_save(user_name , head,  status ,  people , court , treasure);
+        exit(-1);
+        //Game_save(name , head , status , people_effect , court_effect , treasury_effect);
+    } else if(F_choice == 2){
+        exit(-1);
+    } else{
+        printf("No valid input.\n");
         exit(-1);
     }
+
 }
 int main() {
     char name[20];
@@ -136,7 +172,24 @@ int main() {
             if(Main_File == NULL){
                 printf("No file found");
             }
-            Get_prob(head , holder , Main_File);
+            while (1){//Fetching information from files to link list
+                fgets(holder->prob_def , 200 , Main_File);
+                fgets(holder->first_dec , 200 , Main_File);
+                fscanf(Main_File , "%d" , &(holder->fp));
+                fscanf(Main_File , "%d" , &(holder->fc));
+                fscanf(Main_File , "%d\n" , &(holder->ft));
+                fgets(holder->second_dec , 200 , Main_File);
+                fscanf(Main_File , "%d" , &(holder->sp));
+                fscanf(Main_File , "%d" , &(holder->sc));
+                fscanf(Main_File , "%d" , &(holder->st));
+                holder->possibility = 3;
+                break;
+            }
+            Add_end(head , create_node());//Add another node to the end for next problem
+            while (holder->next != NULL){//Change holder to the last node
+                holder = holder->next;
+            }
+            //Get_prob(head , holder , Main_File);
         }
         while (average_effect>10 && people_effect > 0 && court_effect > 0 && treasury_effect > 0){//showing the problems
             struct problem *prob_rand = NULL;
@@ -147,7 +200,6 @@ int main() {
             printf("[2]%s\n" , prob_rand->second_dec);
             int dec;
             scanf("%d" , &dec);//Get the dec for problem
-            My_exit(dec);
             switch (dec) {
                 case 1:{
                     people_effect += prob_rand->fp;
@@ -171,6 +223,13 @@ int main() {
                     if(treasury_effect > 100)
                         treasury_effect = 100;
                     break;}
+                case -1:{
+                    printf("Do you want to save the game?\n[1]Yes,I want to save the game.\n[2]No,exit.\n");
+                    int F_choice;
+                    scanf("%d" , &F_choice);
+                    My_exit(name , head , status , people_effect , court_effect , treasury_effect , F_choice);
+                    break;
+                }
                 default: {
                     printf("No valid input");
                     exit(-1);
@@ -191,7 +250,24 @@ int main() {
                 if(Main_File == NULL){
                     printf("No file found");
                 }
-                Get_prob(head , holder , Main_File);
+                while (1){//Fetching information from files to link list
+                    fgets(holder->prob_def , 200 , Main_File);
+                    fgets(holder->first_dec , 200 , Main_File);
+                    fscanf(Main_File , "%d" , &(holder->fp));
+                    fscanf(Main_File , "%d" , &(holder->fc));
+                    fscanf(Main_File , "%d\n" , &(holder->ft));
+                    fgets(holder->second_dec , 200 , Main_File);
+                    fscanf(Main_File , "%d" , &(holder->sp));
+                    fscanf(Main_File , "%d" , &(holder->sc));
+                    fscanf(Main_File , "%d" , &(holder->st));
+                    holder->possibility = 3;
+                    break;
+                }
+                Add_end(head , create_node());//Add another node to the end for next problem
+                while (holder->next != NULL){//Change holder to the last node
+                    holder = holder->next;
+                }
+                //Get_prob(head , holder , Main_File);
             }
         }
         status = 0;
@@ -199,7 +275,7 @@ int main() {
         printf("Do you want to save the game?\n[1]Yes,I want to save the game.\n[2]No,exit.\n");
         int F_choice;
         scanf("%d" , &F_choice);
-        My_exit(F_choice);
+        My_exit(name , head , status , people_effect , court_effect , treasury_effect , F_choice);
     }else if(strchoose == 2){
 
     }
