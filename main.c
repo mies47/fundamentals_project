@@ -21,6 +21,7 @@ struct problem * create_node(void){
     new_node->next = NULL;
     return new_node;
 }
+
 void Add_end(struct problem *head , struct problem *new_node){
     struct problem * temp = NULL;
     temp = head;
@@ -29,6 +30,25 @@ void Add_end(struct problem *head , struct problem *new_node){
     }
     temp->next = new_node;
     new_node->next = NULL;
+}
+void Get_prob(struct problem *head ,struct problem * holder , FILE * Main_File){
+    while (1){//Fetching information from files to link list
+        fgets(holder->prob_def , 200 , Main_File);
+        fgets(holder->first_dec , 200 , Main_File);
+        fscanf(Main_File , "%d" , &(holder->fp));
+        fscanf(Main_File , "%d" , &(holder->fc));
+        fscanf(Main_File , "%d\n" , &(holder->ft));
+        fgets(holder->second_dec , 200 , Main_File);
+        fscanf(Main_File , "%d" , &(holder->sp));
+        fscanf(Main_File , "%d" , &(holder->sc));
+        fscanf(Main_File , "%d" , &(holder->st));
+        holder->possibility = 3;
+        break;
+    }
+    Add_end(head , create_node());//Add another node to the end for next problem
+    while (holder->next != NULL){//Change holder to the last node
+        holder = holder->next;
+    }
 }
 int linked_num(struct problem * str){//Check the number of remained problems
     int cnt = 0;
@@ -76,9 +96,17 @@ struct problem * Check_cnt(struct problem *str){//check for 0 problem possibilit
     }
     return NULL;
 }
+
+void My_exit(int ex){
+    if(ex == -1){
+        printf("Do you want to save the game?\n[1]Yes\n[2]No\n");
+        exit(-1);
+    }
+}
 int main() {
     char name[20];
     char Address_prob[20];
+    int status = 1;
     FILE *choices;
     choices = fopen("CHOICES.txt" , "r");
     if(choices == NULL){
@@ -108,23 +136,7 @@ int main() {
             if(Main_File == NULL){
                 printf("No file found");
             }
-            while (1){//Fetching information from files to link list
-                fgets(holder->prob_def , 200 , Main_File);
-                fgets(holder->first_dec , 200 , Main_File);
-                fscanf(Main_File , "%d" , &(holder->fp));
-                fscanf(Main_File , "%d" , &(holder->fc));
-                fscanf(Main_File , "%d\n" , &(holder->ft));
-                fgets(holder->second_dec , 200 , Main_File);
-                fscanf(Main_File , "%d" , &(holder->sp));
-                fscanf(Main_File , "%d" , &(holder->sc));
-                fscanf(Main_File , "%d" , &(holder->st));
-                holder->possibility = 3;
-                break;
-            }
-            Add_end(head , create_node());//Add another node to the end for next problem
-            while (holder->next != NULL){//Change holder to the last node
-                holder = holder->next;
-            }
+            Get_prob(head , holder , Main_File);
         }
         while (average_effect>10 && people_effect > 0 && court_effect > 0 && treasury_effect > 0){//showing the problems
             struct problem *prob_rand = NULL;
@@ -135,6 +147,7 @@ int main() {
             printf("[2]%s\n" , prob_rand->second_dec);
             int dec;
             scanf("%d" , &dec);//Get the dec for problem
+            My_exit(dec);
             switch (dec) {
                 case 1:{
                     people_effect += prob_rand->fp;
@@ -178,26 +191,15 @@ int main() {
                 if(Main_File == NULL){
                     printf("No file found");
                 }
-                while (1){//Fetching information from files to link list
-                    fgets(holder->prob_def , 200 , Main_File);
-                    fgets(holder->first_dec , 200 , Main_File);
-                    fscanf(Main_File , "%d" , &(holder->fp));
-                    fscanf(Main_File , "%d" , &(holder->fc));
-                    fscanf(Main_File , "%d\n" , &(holder->ft));
-                    fgets(holder->second_dec , 200 , Main_File);
-                    fscanf(Main_File , "%d" , &(holder->sp));
-                    fscanf(Main_File , "%d" , &(holder->sc));
-                    fscanf(Main_File , "%d" , &(holder->st));
-                    holder->possibility = 3;
-                    break;
-                }
-                Add_end(head , create_node());//Add another node to the end for next problem
-                while (holder->next != NULL){//Change holder to the last node
-                    holder = holder->next;
-                }
+                Get_prob(head , holder , Main_File);
             }
         }
-
+        status = 0;
+        printf("You have lost!\n");
+        printf("Do you want to save the game?\n[1]Yes,I want to save the game.\n[2]No,exit.\n");
+        int F_choice;
+        scanf("%d" , &F_choice);
+        My_exit(F_choice);
     }else if(strchoose == 2){
 
     }
