@@ -111,9 +111,25 @@ int * Arr_possibility(struct problem *head){//save problem possibility in an Arr
     }
     return Arr_poss;
 }
+void Linked_info(struct problem * holder , FILE * Main_File){
+    while (1){//Fetching information from files to link list
+        fgets(holder->prob_def , 200 , Main_File);
+        fgets(holder->first_dec , 200 , Main_File);
+        fscanf(Main_File , "%d" , &(holder->fp));
+        fscanf(Main_File , "%d" , &(holder->fc));
+        fscanf(Main_File , "%d\n" , &(holder->ft));
+        fgets(holder->second_dec , 200 , Main_File);
+        fscanf(Main_File , "%d" , &(holder->sp));
+        fscanf(Main_File , "%d" , &(holder->sc));
+        fscanf(Main_File , "%d" , &(holder->st));
+        holder->possibility = 3;
+        break;
+    }
+}
 void Game_save(char *user_name , struct problem *head, int status , int people , int court , int treasure){
     FILE *save;
     char Add[strlen(user_name) + 5];
+    strcpy(Add , user_name);
     char plus[] = ".bin";
     strcat(Add , plus);
     save = fopen(Add , "wb+");
@@ -137,7 +153,6 @@ void My_exit(char *user_name , struct problem *head, int status , int people , i
         printf("No valid input.\n");
         exit(-1);
     }
-
 }
 int main() {
     char name[20];
@@ -172,24 +187,12 @@ int main() {
             if(Main_File == NULL){
                 printf("No file found");
             }
-            while (1){//Fetching information from files to link list
-                fgets(holder->prob_def , 200 , Main_File);
-                fgets(holder->first_dec , 200 , Main_File);
-                fscanf(Main_File , "%d" , &(holder->fp));
-                fscanf(Main_File , "%d" , &(holder->fc));
-                fscanf(Main_File , "%d\n" , &(holder->ft));
-                fgets(holder->second_dec , 200 , Main_File);
-                fscanf(Main_File , "%d" , &(holder->sp));
-                fscanf(Main_File , "%d" , &(holder->sc));
-                fscanf(Main_File , "%d" , &(holder->st));
-                holder->possibility = 3;
-                break;
-            }
+            Linked_info(holder ,Main_File);
             Add_end(head , create_node());//Add another node to the end for next problem
             while (holder->next != NULL){//Change holder to the last node
                 holder = holder->next;
             }
-            //Get_prob(head , holder , Main_File);
+            fclose(Main_File);
         }
         while (average_effect>10 && people_effect > 0 && court_effect > 0 && treasury_effect > 0){//showing the problems
             struct problem *prob_rand = NULL;
@@ -250,24 +253,11 @@ int main() {
                 if(Main_File == NULL){
                     printf("No file found");
                 }
-                while (1){//Fetching information from files to link list
-                    fgets(holder->prob_def , 200 , Main_File);
-                    fgets(holder->first_dec , 200 , Main_File);
-                    fscanf(Main_File , "%d" , &(holder->fp));
-                    fscanf(Main_File , "%d" , &(holder->fc));
-                    fscanf(Main_File , "%d\n" , &(holder->ft));
-                    fgets(holder->second_dec , 200 , Main_File);
-                    fscanf(Main_File , "%d" , &(holder->sp));
-                    fscanf(Main_File , "%d" , &(holder->sc));
-                    fscanf(Main_File , "%d" , &(holder->st));
-                    holder->possibility = 3;
-                    break;
-                }
+                Linked_info(holder , Main_File);
                 Add_end(head , create_node());//Add another node to the end for next problem
                 while (holder->next != NULL){//Change holder to the last node
                     holder = holder->next;
                 }
-                //Get_prob(head , holder , Main_File);
             }
         }
         status = 0;
@@ -276,8 +266,23 @@ int main() {
         int F_choice;
         scanf("%d" , &F_choice);
         My_exit(name , head , status , people_effect , court_effect , treasury_effect , F_choice);
-    }else if(strchoose == 2){
-
+    }else if(strchoose == 2){//Loading the game from the last saved file
+        int people_effect;
+        int court_effect;
+        int treasury_effect;
+        FILE * Load;
+        char Add[strlen(name) + 5];
+        strcpy(Add , name);
+        char plus[] = ".bin";
+        strcat(Add , plus);
+        Load = fopen(Add , "rb+");
+        int Arr_remain[50];
+        fread(name , sizeof(char *) , 1 , Load);//Fetching info from the saved file
+        fread(&status , sizeof(int) , 1 , Load);
+        fread(Arr_remain , sizeof(int *) , 1 , Load);
+        fread(&people_effect , sizeof(int) , 1 , Load);
+        fread(&court_effect , sizeof(int) , 1 , Load);
+        fread(&treasury_effect , sizeof(int) , 1 , Load);
     }
     else{
         printf("Inavalid number");
