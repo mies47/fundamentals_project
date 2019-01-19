@@ -239,6 +239,7 @@ int main() {
                 }
             }
             printf("People: %d Court: %d Treasury: %d\n" , people_effect , court_effect , treasury_effect);
+            average_effect = (people_effect + court_effect +treasury_effect)/3;
             struct problem * del_node = Check_cnt(head);
             if(del_node!= NULL){
                 head = delete_node(head , del_node);
@@ -283,6 +284,27 @@ int main() {
         fread(&people_effect , sizeof(int) , 1 , Load);
         fread(&court_effect , sizeof(int) , 1 , Load);
         fread(&treasury_effect , sizeof(int) , 1 , Load);
+        if(status == 1){
+            struct problem *head;
+            head = create_node();
+            struct problem* holder;
+            holder = head;
+            for (int i = 1; !feof(choices) ; ++i) {
+                fscanf(choices , "%s" , Address_prob);//Getting c[i].txt from CHOICES.txt
+                FILE * Main_File;
+                Main_File = fopen(Address_prob , "r");
+                if(Main_File == NULL){
+                    printf("No file found");
+                }
+                Linked_info(holder ,Main_File);
+                holder->possibility = Arr_remain[i-1];
+                Add_end(head, create_node());//Add another node to the end for next problem
+                while (holder->next != NULL) {//Change holder to the last node
+                    holder = holder->next;
+                }
+                fclose(Main_File);
+            }
+        }
     }
     else{
         printf("Inavalid number");
