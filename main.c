@@ -304,6 +304,80 @@ int main() {
                 }
                 fclose(Main_File);
             }
+            int average_effect = (people_effect + court_effect +treasury_effect)/3;
+            while (average_effect>10 && people_effect > 0 && court_effect > 0 && treasury_effect > 0){//showing the problems
+                struct problem *prob_rand = NULL;
+                prob_rand = Linked_Rand(head);
+                (prob_rand->possibility)--;
+                printf("%s\n" , prob_rand->prob_def);
+                printf("[1]%s\n" , prob_rand->first_dec);
+                printf("[2]%s\n" , prob_rand->second_dec);
+                int dec;
+                scanf("%d" , &dec);//Get the dec for problem
+                switch (dec) {
+                    case 1:{
+                        people_effect += prob_rand->fp;
+                        if (people_effect > 100)
+                            people_effect = 100;
+                        court_effect += prob_rand->fc;
+                        if (court_effect > 100)
+                            court_effect = 100;
+                        treasury_effect += prob_rand->ft;
+                        if(treasury_effect > 100)
+                            treasury_effect = 100;
+                        break;}
+                    case 2:{
+                        people_effect += prob_rand->sp;
+                        if (people_effect > 100)
+                            people_effect = 100;
+                        court_effect += prob_rand->sc;
+                        if (court_effect > 100)
+                            court_effect = 100;
+                        treasury_effect += prob_rand->st;
+                        if(treasury_effect > 100)
+                            treasury_effect = 100;
+                        break;}
+                    case -1:{
+                        printf("Do you want to save the game?\n[1]Yes,I want to save the game.\n[2]No,exit.\n");
+                        int F_choice;
+                        scanf("%d" , &F_choice);
+                        My_exit(name , head , status , people_effect , court_effect , treasury_effect , F_choice);
+                        break;
+                    }
+                    default: {
+                        printf("No valid input");
+                        exit(-1);
+                    }
+                }
+                printf("People: %d Court: %d Treasury: %d\n" , people_effect , court_effect , treasury_effect);
+                average_effect = (people_effect + court_effect +treasury_effect)/3;
+                struct problem * del_node = Check_cnt(head);
+                if(del_node!= NULL){
+                    head = delete_node(head , del_node);
+                }
+                if(head == NULL){//Check to see if all the problems were deleted
+                    head = create_node();
+                    holder = head;
+                    rewind(choices);
+                    fscanf(choices , "%s" , Address_prob);//Getting c[i].txt from CHOICES.txt
+                    FILE * Main_File;
+                    Main_File = fopen(Address_prob , "r");
+                    if(Main_File == NULL){
+                        printf("No file found");
+                    }
+                    Linked_info(holder , Main_File);
+                    Add_end(head , create_node());//Add another node to the end for next problem
+                    while (holder->next != NULL){//Change holder to the last node
+                        holder = holder->next;
+                    }
+                }
+            }
+            status = 0;
+            printf("You have lost!\n");
+            printf("Do you want to save the game?\n[1]Yes,I want to save the game.\n[2]No,exit.\n");
+            int F_choice;
+            scanf("%d" , &F_choice);
+            My_exit(name , head , status , people_effect , court_effect , treasury_effect , F_choice);
         }
     }
     else{
