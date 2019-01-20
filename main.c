@@ -211,8 +211,38 @@ void score_board(void){
         k++;
     }
 }
-void file_maker(void){
-    printf("Please enter the name of your file");
+void file_maker(void){//function for making a custom problem file
+    FILE * file_add = fopen("CHOICES.txt" , "a");
+    printf("Enter the name of file:\n");
+    char name[20];
+    scanf("%s" , name);
+    fprintf(file_add , "\r\n%s" , name);
+    FILE * n_add =fopen(name , "wb+");
+    printf("Enter the question:\n");
+    scanf("\n");
+    char question[200];
+    gets(question);
+    fprintf(n_add , "%s\r\n" ,question);
+    printf("Enter the first decision:\n");
+    scanf("\n");
+    char first_dec[200];
+    gets(first_dec);
+    fprintf(n_add , "%s\r\n" ,first_dec);
+    int fp , fc , ft;
+    printf("Enter the people , court , treasury effect:\n");
+    scanf("%d%d%d" , &fp ,&fc ,&ft);
+    fprintf(n_add , "%d\r\n%d\r\n%d\r\n" , fp , fc , ft);
+    printf("Enter the second decision:\n");
+    scanf("\n");
+    char second_dec[200];
+    gets(second_dec);
+    fprintf(n_add , "%s\r\n" , second_dec);
+    int sp , sc , st;
+    printf("Enter the people , court , treasury effect:\n");
+    scanf("%d%d%d" , &sp ,&sc ,&st);
+    fprintf(n_add , "%d\r\n%d\r\n%d\r\n" , sp , sc , st);
+    fclose(n_add);
+    fclose(file_add);
 }
 int main() {
     char name[20];
@@ -226,6 +256,7 @@ int main() {
     printf("[1]Start a new game\n");
     printf("[2]Load saved game\n");
     printf("[3]Show the scoreboard\n");
+    printf("[4]Make your own question file.\n");
     printf("In any part of the game enter -1 to exit the game\n");
     char strchoose;
     int *Arr_remain;
@@ -259,6 +290,9 @@ int main() {
                     holder = holder->next;
                 }
                 fclose(Main_File);
+            }
+            if(strcmp(holder->prob_def , "\0")==0){//produces an extra node which is deleted
+                delete_node(head , holder);
             }
             Arr_remain = (int *) malloc(sizeof(int) * (--i));
             struct problem *temp;
@@ -666,10 +700,25 @@ int main() {
             score_board();
         } else if (strchoose == '-') {
             exit(-1);
-        } else {
+        }else if(strchoose == '4'){
+            fclose(choices);
+            printf("Enter -1 to exit.\n");
+            char temp[2];
+            while (1){
+                getchar();
+                file_maker();
+                scanf("%s" , temp);
+                if(temp[0] == '-'){
+                    fclose(fopen("-1" , "r+"));
+                    exit(-1);
+                }
+
+            }
+            exit(-1);
+        }
+        else {
             printf("Inavalid number\n");
         }
     }
-
     return 0;
 }
