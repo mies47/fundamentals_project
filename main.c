@@ -166,11 +166,12 @@ void Game_save(char *user_name , struct problem *head,int *remain , int status ,
     fclose(name_save);
     fclose(save);
 }
-void My_exit(char *user_name , struct problem *head,int * Arr_remain , int status , int people , int court , int treasure , int F_choice){
-    if(F_choice == 1){
+void My_exit(char *user_name , struct problem *head,int * Arr_remain , int status , int people , int court , int treasure , char F_choice){
+    if(F_choice == '1'){
         Game_save(user_name , head, Arr_remain ,  status ,  people , court , treasure);
+        printf("The game was saved.");
         exit(-1);
-    } else if(F_choice == 2){
+    } else if(F_choice == '2'){
         exit(-1);
     } else{
         printf("No valid input.\n");
@@ -181,6 +182,7 @@ void score_board(void){
     FILE * score;
     if(fopen("name_save.bin" , "rb") == NULL){
         printf("There is no saved play to score!!!\n");
+        return;
     }
     score = fopen("name_save.bin" , "rb");
     int i = 1;
@@ -209,16 +211,15 @@ void score_board(void){
         k++;
     }
 }
+void file_maker(void){
+    printf("Please enter the name of your file");
+}
 int main() {
     char name[20];
     char Address_prob[20];
     int status = 1;
     FILE *choices;
     choices = fopen("CHOICES.txt" , "r");
-    if(choices == NULL){
-        printf("Couldn't Find The Valid Files");
-        exit(-1);
-    }
     printf("Please enter your name:");
     gets(name);
     printf("Please choose :\n");
@@ -226,290 +227,63 @@ int main() {
     printf("[2]Load saved game\n");
     printf("[3]Show the scoreboard\n");
     printf("In any part of the game enter -1 to exit the game\n");
-    int strchoose;
+    char strchoose;
     int *Arr_remain;
-    scanf("%d" , &strchoose);
-    if(strchoose == 1){
-        int people_effect = 50;
-        int court_effect = 50;
-        int treasury_effect = 50;
-        double average_effect = 50;
-        struct problem *head;
-        head = create_node();
-        struct problem* holder;
-        holder = head;
-        int i;
-        for (i = 1; !feof(choices) ; ++i) {
-            fscanf(choices , "%s" , Address_prob);//Getting c[i].txt from CHOICES.txt
-            FILE * Main_File;
-            Main_File = fopen(Address_prob , "r");
-            if(Main_File == NULL){
-                printf("No file found");
-            }
-            Linked_info(holder ,Main_File);
-            holder->Q_num = i;
-            Add_end(head , create_node());//Add another node to the end for next problem
-            while (holder->next != NULL){//Change holder to the last node
-                holder = holder->next;
-            }
-            fclose(Main_File);
-        }
-        Arr_remain = (int *)malloc(sizeof(int) * (--i));
-        struct problem *temp;
-        temp = head;
-        for (int j = 0; temp != NULL ; ++j) {
-            Arr_remain[j] = temp->possibility;
-            temp = temp->next;
-        }
-
-        while (average_effect>10 && people_effect > 0 && court_effect > 0 && treasury_effect > 0){//showing the problems
-            struct problem *prob_rand = NULL;
-            prob_rand = Linked_Rand(head);
-            (prob_rand->possibility)--;
-            Arr_remain[(prob_rand->Q_num) - 1] = prob_rand->possibility;
-            printf("%s\n" , prob_rand->prob_def);
-            printf("[1]%s\n" , prob_rand->first_dec);
-            printf("[2]%s\n" , prob_rand->second_dec);
-            int dec;
-            scanf("%d" , &dec);//Get the dec for problem
-            switch (dec) {
-                case 1:{
-                    people_effect += prob_rand->fp;
-                    if (people_effect > 100)
-                        people_effect = 100;
-                    court_effect += prob_rand->fc;
-                    if (court_effect > 100)
-                        court_effect = 100;
-                    treasury_effect += prob_rand->ft;
-                    if(treasury_effect > 100)
-                        treasury_effect = 100;
-                    break;}
-                case 2:{
-                    people_effect += prob_rand->sp;
-                    if (people_effect > 100)
-                        people_effect = 100;
-                    court_effect += prob_rand->sc;
-                    if (court_effect > 100)
-                        court_effect = 100;
-                    treasury_effect += prob_rand->st;
-                    if(treasury_effect > 100)
-                        treasury_effect = 100;
-                    break;}
-                case -1:{
-                    printf("Do you want to save the game?\n[1]Yes,I want to save the game.\n[2]No,exit.\n");
-                    int F_choice;
-                    scanf("%d" , &F_choice);
-                    My_exit(name , head ,Arr_remain , status , people_effect , court_effect , treasury_effect , F_choice);
-                    break;
-                }
-                default: {
-                    printf("No valid input");
-                    exit(-1);
-                }
-            }
-            printf("People: %d Court: %d Treasury: %d\n" , people_effect , court_effect , treasury_effect);
-            average_effect = (people_effect + court_effect +treasury_effect)/3;
-            struct problem * del_node = Check_cnt(head);
-            if(del_node!= NULL){
-                head = delete_node(head , del_node);
-            }
-            if(head == NULL){//Check to see if all the problems were deleted
-                head = create_node();
-                holder = head;
-                rewind(choices);
-                fscanf(choices , "%s" , Address_prob);//Getting c[i].txt from CHOICES.txt
-                FILE * Main_File;
-                Main_File = fopen(Address_prob , "r");
-                if(Main_File == NULL){
-                    printf("No file found");
-                }
-                Linked_info(holder , Main_File);
-                Add_end(head , create_node());//Add another node to the end for next problem
-                while (holder->next != NULL){//Change holder to the last node
-                    holder = holder->next;
-                }
-            }
-        }
-        status = 0;
-        printf("You have lost!\n");
-        printf("Do you want to save the game?\n[1]Yes,I want to save the game.\n[2]No,exit.\n");
-        int F_choice;
-        scanf("%d" , &F_choice);
-        My_exit(name , head ,Arr_remain , status , people_effect , court_effect , treasury_effect , F_choice);
-    }else if(strchoose == 2){//Loading the game from the last saved file
-        int people_effect;
-        int court_effect;
-        int treasury_effect;
-        FILE * Load;
-        char Add[strlen(name) + 5];
-        strcpy(Add , name);
-        char plus[] = ".bin";
-        strcat(Add , plus);
-        /*if(fopen(Add , "rb")==NULL){
-            printf("There is no saved game.");
-            exit(-1);
-        }*/
-        Load = fopen(Add , "rb+");
-        if(Load == NULL){
-            printf("There is no saved game.");
+    while(1) {
+        scanf(" %c", &strchoose);
+        if(choices == NULL && strchoose != 4 ){
+            printf("Couldn't Find The Valid Files\n");
             exit(-1);
         }
-        int Arr_remain[50];
-        fread(name , sizeof(char *) , 1 , Load);//Fetching info from the saved file
-        fread(&status , sizeof(int) , 1 , Load);
-        fread(Arr_remain , sizeof(int *) , 1 , Load);
-        fread(&people_effect , sizeof(int) , 1 , Load);
-        fread(&court_effect , sizeof(int) , 1 , Load);
-        fread(&treasury_effect , sizeof(int) , 1 , Load);
-        if(status == 1){
+        if (strchoose == '1') {
+            int people_effect = 50;
+            int court_effect = 50;
+            int treasury_effect = 50;
+            double average_effect = 50;
             struct problem *head;
             head = create_node();
-            struct problem* holder;
+            struct problem *holder;
             holder = head;
-            for (int i = 1; !feof(choices) ; ++i) {
-                fscanf(choices , "%s" , Address_prob);//Getting c[i].txt from CHOICES.txt
-                FILE * Main_File;
-                Main_File = fopen(Address_prob , "r");
-                if(Main_File == NULL){
+            int i;
+            for (i = 1; !feof(choices); ++i) {
+                fscanf(choices, "%s", Address_prob);//Getting c[i].txt from CHOICES.txt
+                FILE *Main_File;
+                Main_File = fopen(Address_prob, "r");
+                if (Main_File == NULL) {
                     printf("No file found");
                 }
-                Linked_info(holder ,Main_File);
-                holder->possibility = Arr_remain[i-1];
+                Linked_info(holder, Main_File);
+                holder->Q_num = i;
                 Add_end(head, create_node());//Add another node to the end for next problem
                 while (holder->next != NULL) {//Change holder to the last node
                     holder = holder->next;
                 }
                 fclose(Main_File);
             }
-            struct problem * del_node = Check_cnt(head);
-            if(del_node!= NULL){
-                head = delete_node(head , del_node);
-            }
-            printf("People: %d Court: %d Treasury: %d\n" , people_effect , court_effect , treasury_effect);
-            int average_effect = (people_effect + court_effect +treasury_effect)/3;
-            while (average_effect>10 && people_effect > 0 && court_effect > 0 && treasury_effect > 0){//showing the problems
-                struct problem *prob_rand = NULL;
-                prob_rand = Linked_Rand(head);
-                (prob_rand->possibility)--;
-                struct problem *temp;
-                temp = head;
-                for (int j = 0; temp != NULL ; ++j) {
-                    Arr_remain[j] = temp->possibility;
-                    temp = temp->next;
-                }
-                printf("%s\n" , prob_rand->prob_def);
-                printf("[1]%s\n" , prob_rand->first_dec);
-                printf("[2]%s\n" , prob_rand->second_dec);
-                int dec;
-                scanf("%d" , &dec);//Get the dec for problem
-                switch (dec) {
-                    case 1:{
-                        people_effect += prob_rand->fp;
-                        if (people_effect > 100)
-                            people_effect = 100;
-                        court_effect += prob_rand->fc;
-                        if (court_effect > 100)
-                            court_effect = 100;
-                        treasury_effect += prob_rand->ft;
-                        if(treasury_effect > 100)
-                            treasury_effect = 100;
-                        break;}
-                    case 2:{
-                        people_effect += prob_rand->sp;
-                        if (people_effect > 100)
-                            people_effect = 100;
-                        court_effect += prob_rand->sc;
-                        if (court_effect > 100)
-                            court_effect = 100;
-                        treasury_effect += prob_rand->st;
-                        if(treasury_effect > 100)
-                            treasury_effect = 100;
-                        break;}
-                    case -1:{
-                        printf("Do you want to save the game?\n[1]Yes,I want to save the game.\n[2]No,exit.\n");
-                        int F_choice;
-                        scanf("%d" , &F_choice);
-                        My_exit(name , head , Arr_remain ,status , people_effect , court_effect , treasury_effect , F_choice);
-                        break;
-                    }
-                    default: {
-                        printf("No valid input");
-                        exit(-1);
-                    }
-                }
-                printf("People: %d Court: %d Treasury: %d\n" , people_effect , court_effect , treasury_effect);
-                average_effect = (people_effect + court_effect +treasury_effect)/3;
-                struct problem * del_node = Check_cnt(head);
-                if(del_node!= NULL){
-                    head = delete_node(head , del_node);
-                }
-                if(head == NULL){//Check to see if all the problems were deleted
-                    head = create_node();
-                    holder = head;
-                    rewind(choices);
-                    fscanf(choices , "%s" , Address_prob);//Getting c[i].txt from CHOICES.txt
-                    FILE * Main_File;
-                    Main_File = fopen(Address_prob , "r");
-                    if(Main_File == NULL){
-                        printf("No file found");
-                    }
-                    Linked_info(holder , Main_File);
-                    Add_end(head , create_node());//Add another node to the end for next problem
-                    while (holder->next != NULL){//Change holder to the last node
-                        holder = holder->next;
-                    }
-                }
-            }
-            status = 0;
-            printf("You have lost!\n");
-            printf("Do you want to save the game?\n[1]Yes,I want to save the game.\n[2]No,exit.\n");
-            int F_choice;
-            scanf("%d" , &F_choice);
-            My_exit(name , head ,Arr_remain , status , people_effect , court_effect , treasury_effect , F_choice);
-        } else{//if the player has lost and saved the game
-            int people_effect = 50;
-            int court_effect = 50;
-            int treasury_effect = 50;
-            double average_effect = 50;
-            int * Arr_remain;
-            struct problem *head;
-            head = create_node();
-            struct problem* holder;
-            holder = head;
-            int i;
-            for (i = 1; !feof(choices) ; ++i) {
-                fscanf(choices , "%s" , Address_prob);//Getting c[i].txt from CHOICES.txt
-                FILE * Main_File;
-                Main_File = fopen(Address_prob , "r");
-                if(Main_File == NULL){
-                    printf("No file found");
-                }
-                Linked_info(holder ,Main_File);
-                Add_end(head , create_node());//Add another node to the end for next problem
-                while (holder->next != NULL){//Change holder to the last node
-                    holder = holder->next;
-                }
-                fclose(Main_File);
-            }
-            Arr_remain = (int *)malloc(sizeof(int) * (--i));
+            Arr_remain = (int *) malloc(sizeof(int) * (--i));
             struct problem *temp;
             temp = head;
-            for (int j = 0; temp != NULL ; ++j) {
+            for (int j = 0; temp != NULL; ++j) {
                 Arr_remain[j] = temp->possibility;
                 temp = temp->next;
             }
-            while (average_effect>10 && people_effect > 0 && court_effect > 0 && treasury_effect > 0){//showing the problems
+
+            while (average_effect > 10 && people_effect > 0 && court_effect > 0 &&
+                   treasury_effect > 0) {//showing the problems
                 struct problem *prob_rand = NULL;
                 prob_rand = Linked_Rand(head);
                 (prob_rand->possibility)--;
                 Arr_remain[(prob_rand->Q_num) - 1] = prob_rand->possibility;
-                printf("%s\n" , prob_rand->prob_def);
-                printf("[1]%s\n" , prob_rand->first_dec);
-                printf("[2]%s\n" , prob_rand->second_dec);
-                int dec;
-                scanf("%d" , &dec);//Get the dec for problem
+                char dec = '0';
+                while(!((dec == '1') || (dec == '2') || (dec == '-'))) {
+                    printf("%s\n", prob_rand->prob_def);
+                    printf("[1]%s\n", prob_rand->first_dec);
+                    printf("[2]%s\n", prob_rand->second_dec);
+                    scanf(" %c", &dec);//Get the dec for problem
+                }
+                char F_choice[2];
                 switch (dec) {
-                    case 1:{
+                    case '1': {
                         people_effect += prob_rand->fp;
                         if (people_effect > 100)
                             people_effect = 100;
@@ -517,10 +291,11 @@ int main() {
                         if (court_effect > 100)
                             court_effect = 100;
                         treasury_effect += prob_rand->ft;
-                        if(treasury_effect > 100)
+                        if (treasury_effect > 100)
                             treasury_effect = 100;
-                        break;}
-                    case 2:{
+                        break;
+                    }
+                    case '2': {
                         people_effect += prob_rand->sp;
                         if (people_effect > 100)
                             people_effect = 100;
@@ -528,40 +303,50 @@ int main() {
                         if (court_effect > 100)
                             court_effect = 100;
                         treasury_effect += prob_rand->st;
-                        if(treasury_effect > 100)
+                        if (treasury_effect > 100)
                             treasury_effect = 100;
-                        break;}
-                    case -1:{
-                        printf("Do you want to save the game?\n[1]Yes,I want to save the game.\n[2]No,exit.\n");
-                        int F_choice;
-                        scanf("%d" , &F_choice);
-                        My_exit(name , head ,Arr_remain , status , people_effect , court_effect , treasury_effect , F_choice);
                         break;
                     }
+                    case '-': {
+                        printf("Do you want to save the game?\n[1]Yes,I want to save the game.\n[2]No,exit.\n");
+                        getchar();
+                        while (1) {
+                            scanf("%s" , F_choice);
+                            if (F_choice[0] == '1') {
+                                My_exit(name, head, Arr_remain, status, people_effect, court_effect, treasury_effect,
+                                        F_choice[0]);
+                                printf("The game was saved.");
+                                break;
+                            } else if(F_choice[0] == '2' || F_choice[0] == '-'){
+                                exit(-1);
+                            } else if(!(F_choice[0] == '2' || F_choice[0] == '-')){
+                                printf("No valid input\n");
+                            }
+                        }
+                    }
                     default: {
-                        printf("No valid input");
-                        exit(-1);
+                        printf("No valid input\n");
                     }
                 }
-                printf("People: %d Court: %d Treasury: %d\n" , people_effect , court_effect , treasury_effect);
-                average_effect = (people_effect + court_effect +treasury_effect)/3;
-                struct problem * del_node = Check_cnt(head);
-                if(del_node!= NULL){
-                    head = delete_node(head , del_node);
+                printf("People: %d Court: %d Treasury: %d\n", people_effect, court_effect, treasury_effect);
+                average_effect = (people_effect + court_effect + treasury_effect) / 3;
+                struct problem *del_node = Check_cnt(head);
+                if (del_node != NULL) {
+                    head = delete_node(head, del_node);
                 }
-                if(head == NULL){//Check to see if all the problems were deleted
+                if (head == NULL) {//Check to see if all the problems were deleted
                     head = create_node();
                     holder = head;
                     rewind(choices);
-                    fscanf(choices , "%s" , Address_prob);//Getting c[i].txt from CHOICES.txt
-                    FILE * Main_File;
-                    Main_File = fopen(Address_prob , "r");
-                    if(Main_File == NULL){
+                    fscanf(choices, "%s", Address_prob);//Getting c[i].txt from CHOICES.txt
+                    FILE *Main_File;
+                    Main_File = fopen(Address_prob, "r");
+                    if (Main_File == NULL) {
                         printf("No file found");
                     }
-                    Linked_info(holder , Main_File);
-                    Add_end(head , create_node());//Add another node to the end for next problem
-                    while (holder->next != NULL){//Change holder to the last node
+                    Linked_info(holder, Main_File);
+                    Add_end(head, create_node());//Add another node to the end for next problem
+                    while (holder->next != NULL) {//Change holder to the last node
                         holder = holder->next;
                     }
                 }
@@ -569,21 +354,322 @@ int main() {
             status = 0;
             printf("You have lost!\n");
             printf("Do you want to save the game?\n[1]Yes,I want to save the game.\n[2]No,exit.\n");
-            int F_choice;
-            scanf("%d" , &F_choice);
-            My_exit(name , head ,Arr_remain , status , people_effect , court_effect , treasury_effect , F_choice);
+            char F_choice[2];
+            getchar();
+                while (1) {
+                    scanf("%s" , F_choice);
+                    if (F_choice[0] == '1') {
+                        My_exit(name, head, Arr_remain, status, people_effect, court_effect, treasury_effect,
+                                F_choice[0]);
+                        printf("The game was saved.");
+                        break;
+                    } else if(F_choice[0] == '2' || F_choice[0] == '-'){
+                        exit(-1);
+                    } else if(!(F_choice[0] == '2' || F_choice[0] == '-')){
+                        printf("No valid input\n");
+                    }
+                }
+        } else if (strchoose == '2') {//Loading the game from the last saved file
+            int people_effect;
+            int court_effect;
+            int treasury_effect;
+            FILE *Load;
+            char Add[strlen(name) + 5];
+            strcpy(Add, name);
+            char plus[] = ".bin";
+            strcat(Add, plus);
+            /*if(fopen(Add , "rb")==NULL){
+                printf("There is no saved game.");
+                exit(-1);
+            }*/
+            Load = fopen(Add, "rb+");
+            if (Load == NULL) {
+                printf("There is no saved game.");
+                exit(-1);
+            }
+            int Arr_remain[50];
+            fread(name, sizeof(char *), 1, Load);//Fetching info from the saved file
+            fread(&status, sizeof(int), 1, Load);
+            fread(Arr_remain, sizeof(int *), 1, Load);
+            fread(&people_effect, sizeof(int), 1, Load);
+            fread(&court_effect, sizeof(int), 1, Load);
+            fread(&treasury_effect, sizeof(int), 1, Load);
+            if (status == 1) {
+                struct problem *head;
+                head = create_node();
+                struct problem *holder;
+                holder = head;
+                for (int i = 1; !feof(choices); ++i) {
+                    fscanf(choices, "%s", Address_prob);//Getting c[i].txt from CHOICES.txt
+                    FILE *Main_File;
+                    Main_File = fopen(Address_prob, "r");
+                    if (Main_File == NULL) {
+                        printf("No file found");
+                    }
+                    Linked_info(holder, Main_File);
+                    holder->possibility = Arr_remain[i - 1];
+                    Add_end(head, create_node());//Add another node to the end for next problem
+                    while (holder->next != NULL) {//Change holder to the last node
+                        holder = holder->next;
+                    }
+                    fclose(Main_File);
+                }
+                struct problem *del_node = Check_cnt(head);
+                if (del_node != NULL) {
+                    head = delete_node(head, del_node);
+                }
+                printf("People: %d Court: %d Treasury: %d\n", people_effect, court_effect, treasury_effect);
+                int average_effect = (people_effect + court_effect + treasury_effect) / 3;
+                while (average_effect > 10 && people_effect > 0 && court_effect > 0 &&
+                       treasury_effect > 0) {//showing the problems
+                    struct problem *prob_rand = NULL;
+                    prob_rand = Linked_Rand(head);
+                    (prob_rand->possibility)--;
+                    struct problem *temp;
+                    temp = head;
+                    for (int j = 0; temp != NULL; ++j) {
+                        Arr_remain[j] = temp->possibility;
+                        temp = temp->next;
+                    }
+                    char dec = '0';
+                    while (!((dec == '1') || (dec == '2') || (dec == '-'))) {
+                        printf("%s\n", prob_rand->prob_def);
+                        printf("[1]%s\n", prob_rand->first_dec);
+                        printf("[2]%s\n", prob_rand->second_dec);
+                        scanf(" %c", &dec);//Get the dec for problem
+                    }
+                    switch (dec) {
+                        case '1': {
+                            people_effect += prob_rand->fp;
+                            if (people_effect > 100)
+                                people_effect = 100;
+                            court_effect += prob_rand->fc;
+                            if (court_effect > 100)
+                                court_effect = 100;
+                            treasury_effect += prob_rand->ft;
+                            if (treasury_effect > 100)
+                                treasury_effect = 100;
+                            break;
+                        }
+                        case '2': {
+                            people_effect += prob_rand->sp;
+                            if (people_effect > 100)
+                                people_effect = 100;
+                            court_effect += prob_rand->sc;
+                            if (court_effect > 100)
+                                court_effect = 100;
+                            treasury_effect += prob_rand->st;
+                            if (treasury_effect > 100)
+                                treasury_effect = 100;
+                            break;
+                        }
+                        case '-': {
+                            printf("Do you want to save the game?\n[1]Yes,I want to save the game.\n[2]No,exit.\n");
+                            char F_choice[2];
+                            getchar();
+                            while (1) {
+                                scanf("%s" , F_choice);
+                                if (F_choice[0] == '1') {
+                                    My_exit(name, head, Arr_remain, status, people_effect, court_effect, treasury_effect,
+                                            F_choice[0]);
+                                    printf("The game was saved.");
+                                    break;
+                                } else if(F_choice[0] == '2' || F_choice[0] == '-'){
+                                    exit(-1);
+                                } else if(!(F_choice[0] == '2' || F_choice[0] == '-')){
+                                    printf("No valid input\n");
+                                }
+                            }
+                        }
+                        default: {
+                            printf("No valid input\n");
+                            exit(-1);
+                        }
+                    }
+                    printf("People: %d Court: %d Treasury: %d\n", people_effect, court_effect, treasury_effect);
+                    average_effect = (people_effect + court_effect + treasury_effect) / 3;
+                    struct problem *del_node = Check_cnt(head);
+                    if (del_node != NULL) {
+                        head = delete_node(head, del_node);
+                    }
+                    if (head == NULL) {//Check to see if all the problems were deleted
+                        head = create_node();
+                        holder = head;
+                        rewind(choices);
+                        fscanf(choices, "%s", Address_prob);//Getting c[i].txt from CHOICES.txt
+                        FILE *Main_File;
+                        Main_File = fopen(Address_prob, "r");
+                        if (Main_File == NULL) {
+                            printf("No file found");
+                        }
+                        Linked_info(holder, Main_File);
+                        Add_end(head, create_node());//Add another node to the end for next problem
+                        while (holder->next != NULL) {//Change holder to the last node
+                            holder = holder->next;
+                        }
+                    }
+                }
+                status = 0;
+                printf("You have lost!\n");
+                printf("Do you want to save the game?\n[1]Yes,I want to save the game.\n[2]No,exit.\n");
+                char F_choice[2];
+            getchar();
+            while (1) {
+                scanf("%s" , F_choice);
+                if (F_choice[0] == '1') {
+                    My_exit(name, head, Arr_remain, status, people_effect, court_effect, treasury_effect,
+                            F_choice[0]);
+                    printf("The game was saved.");
+                    break;
+                } else if(F_choice[0] == '2' || F_choice[0] == '-'){
+                    exit(-1);
+                } else if(!(F_choice[0] == '2' || F_choice[0] == '-')){
+                    printf("No valid input\n");
+                }
+                }
+            } else {//if the player has lost and saved the game
+                int people_effect = 50;
+                int court_effect = 50;
+                int treasury_effect = 50;
+                double average_effect = 50;
+                int *Arr_remain;
+                struct problem *head;
+                head = create_node();
+                struct problem *holder;
+                holder = head;
+                int i;
+                for (i = 1; !feof(choices); ++i) {
+                    fscanf(choices, "%s", Address_prob);//Getting c[i].txt from CHOICES.txt
+                    FILE *Main_File;
+                    Main_File = fopen(Address_prob, "r");
+                    if (Main_File == NULL) {
+                        printf("No file found");
+                    }
+                    Linked_info(holder, Main_File);
+                    Add_end(head, create_node());//Add another node to the end for next problem
+                    while (holder->next != NULL) {//Change holder to the last node
+                        holder = holder->next;
+                    }
+                    fclose(Main_File);
+                }
+                Arr_remain = (int *) malloc(sizeof(int) * (--i));
+                struct problem *temp;
+                temp = head;
+                for (int j = 0; temp != NULL; ++j) {
+                    Arr_remain[j] = temp->possibility;
+                    temp = temp->next;
+                }
+                while (average_effect > 10 && people_effect > 0 && court_effect > 0 &&
+                       treasury_effect > 0) {//showing the problems
+                    struct problem *prob_rand = NULL;
+                    prob_rand = Linked_Rand(head);
+                    (prob_rand->possibility)--;
+                    Arr_remain[(prob_rand->Q_num) - 1] = prob_rand->possibility;
+                    char dec = '0';
+                    while (!((dec == '1') || (dec == '2') || (dec == '-'))) {
+                        printf("%s\n", prob_rand->prob_def);
+                        printf("[1]%s\n", prob_rand->first_dec);
+                        printf("[2]%s\n", prob_rand->second_dec);
+                        scanf(" %c", &dec);//Get the dec for problem
+                    }
+                    switch (dec) {
+                        case '1': {
+                            people_effect += prob_rand->fp;
+                            if (people_effect > 100)
+                                people_effect = 100;
+                            court_effect += prob_rand->fc;
+                            if (court_effect > 100)
+                                court_effect = 100;
+                            treasury_effect += prob_rand->ft;
+                            if (treasury_effect > 100)
+                                treasury_effect = 100;
+                            break;
+                        }
+                        case '2': {
+                            people_effect += prob_rand->sp;
+                            if (people_effect > 100)
+                                people_effect = 100;
+                            court_effect += prob_rand->sc;
+                            if (court_effect > 100)
+                                court_effect = 100;
+                            treasury_effect += prob_rand->st;
+                            if (treasury_effect > 100)
+                                treasury_effect = 100;
+                            break;
+                        }
+                        case '-': {
+                            printf("Do you want to save the game?\n[1]Yes,I want to save the game.\n[2]No,exit.\n");
+                            char F_choice[2];
+                            getchar();
+                            while (1) {
+                                scanf("%s" , F_choice);
+                                if (F_choice[0] == '1') {
+                                    My_exit(name, head, Arr_remain, status, people_effect, court_effect, treasury_effect,
+                                            F_choice[0]);
+                                    printf("The game was saved.");
+                                    break;
+                                } else if(F_choice[0] == '2' || F_choice[0] == '-'){
+                                    exit(-1);
+                                } else if(!(F_choice[0] == '2' || F_choice[0] == '-')){
+                                    printf("No valid input\n");
+                                }
+                            }
+                        }
+                        default: {
+                            printf("No valid input\n");
+                            exit(-1);
+                        }
+                    }
+                    printf("People: %d Court: %d Treasury: %d\n", people_effect, court_effect, treasury_effect);
+                    average_effect = (people_effect + court_effect + treasury_effect) / 3;
+                    struct problem *del_node = Check_cnt(head);
+                    if (del_node != NULL) {
+                        head = delete_node(head, del_node);
+                    }
+                    if (head == NULL) {//Check to see if all the problems were deleted
+                        head = create_node();
+                        holder = head;
+                        rewind(choices);
+                        fscanf(choices, "%s", Address_prob);//Getting c[i].txt from CHOICES.txt
+                        FILE *Main_File;
+                        Main_File = fopen(Address_prob, "r");
+                        if (Main_File == NULL) {
+                            printf("No file found");
+                        }
+                        Linked_info(holder, Main_File);
+                        Add_end(head, create_node());//Add another node to the end for next problem
+                        while (holder->next != NULL) {//Change holder to the last node
+                            holder = holder->next;
+                        }
+                    }
+                }
+                status = 0;
+                printf("You have lost!\n");
+                printf("Do you want to save the game?\n[1]Yes,I want to save the game.\n[2]No,exit.\n");
+                char F_choice[2];
+                getchar();
+                while (1) {
+                    scanf("%s" , F_choice);
+                    if (F_choice[0] == '1') {
+                        My_exit(name, head, Arr_remain, status, people_effect, court_effect, treasury_effect,
+                                F_choice[0]);
+                        printf("The game was saved.");
+                        break;
+                    } else if(F_choice[0] == '2' || F_choice[0] == '-'){
+                        exit(-1);
+                    } else if(!(F_choice[0] == '2' || F_choice[0] == '-')){
+                        printf("No valid input\n");
+                    }
+                }
+            }
+        } else if (strchoose == '3') {
+            score_board();
+        } else if (strchoose == '-') {
+            exit(-1);
+        } else {
+            printf("Inavalid number\n");
         }
-    }else if(strchoose==3){
-        score_board();
     }
-    else if(strchoose == -1){
-        exit(-1);
-    }
-    else{
-        printf("Inavalid number");
-        exit(-1);
-    }
-
 
     return 0;
 }
