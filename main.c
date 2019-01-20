@@ -15,12 +15,40 @@ struct problem{
     int possibility;
     struct problem *next;
 };
-struct Problem_Score{
+struct Problem_Score{//struct for score_board
     char name[20];
     int people;
     int court;
     int treasury;
 };
+void swap(struct Problem_Score *xp, struct Problem_Score *yp)
+{
+    struct Problem_Score temp = *xp;
+    *xp = *yp;
+    *yp = temp;
+}
+
+// A function to implement bubble sort
+void bubbleSort(struct Problem_Score arr[], int n) {
+
+    int i, j;
+    for (i = 0; i < n - 1; i++) {
+        // Last i elements are already in place
+        for (j = 0; j < n - i - 1; j++) {
+            if (arr[j].people < arr[j + 1].people) {
+                swap(&(arr[j]), &(arr[j + 1]));
+            } else if (arr[j].people == arr[j + 1].people) {
+                if (arr[j].court < arr[j + 1].court) {
+                    swap(&(arr[j]), &(arr[j + 1]));
+                } else if (arr[j].court == arr[j + 1].court) {
+                    if (arr[j].court < arr[j + 1].court) {
+                        swap(&(arr[j]), &(arr[j + 1]));
+                    }
+                }
+            }
+        }
+    }
+}
 struct problem * create_node(void){
     struct problem * new_node;
     new_node = (struct problem *)malloc(sizeof(struct problem));
@@ -140,10 +168,8 @@ void Game_save(char *user_name , struct problem *head, int status , int people ,
     strcat(Add , plus);
     save = fopen(Add , "wb+");
     FILE *name_save;
-    name_save = fopen("name_save.txt" ,"a");
-    fputs(user_name , name_save);
-    char temp[] = "\n";
-    fputs(temp, name_save);
+    name_save = fopen("name_save.bin" ,"ab");
+    fwrite(user_name , sizeof(char *) , 1 ,name_save);
     int *remain = Arr_possibility(head);
     fwrite(user_name , sizeof(char *) , 1 , save);
     fwrite(&status , sizeof(int) , 1 ,save);
@@ -158,7 +184,6 @@ void My_exit(char *user_name , struct problem *head, int status , int people , i
     if(F_choice == 1){
         Game_save(user_name , head,  status ,  people , court , treasure);
         exit(-1);
-        //Game_save(name , head , status , people_effect , court_effect , treasury_effect);
     } else if(F_choice == 2){
         exit(-1);
     } else{
@@ -166,7 +191,38 @@ void My_exit(char *user_name , struct problem *head, int status , int people , i
         exit(-1);
     }
 }
-
+void score_board(void){
+    FILE * score;
+    if(fopen("name_save.bin" , "rb") == NULL){
+        printf("There is no saved play to score!!!\n");
+    }
+    score = fopen("name_save.bin" , "rb");
+    int i = 1;
+    struct Problem_Score  P_score[100];
+    while (!feof(score)){
+        char Add[25];
+        fread(Add , sizeof(char *) , 1 ,score);
+        strcat(Add , ".bin");
+        FILE * Player_score = fopen(Add , "rb");
+        if(Player_score == NULL){
+            break;
+        }
+        fread((P_score[i-1].name) , sizeof(char *) , 1 , Player_score);
+        fseek(Player_score , sizeof(int) , SEEK_CUR);
+        fseek(Player_score , sizeof(int *) , SEEK_CUR);
+        fread(&(P_score[i-1].people) , sizeof(int) , 1 , Player_score);
+        fread(&(P_score[i-1].court) , sizeof(int) , 1 , Player_score);
+        fread(&(P_score[i-1].treasury) , sizeof(int) , 1 ,Player_score);
+        i++;
+        fclose(Player_score);
+    }
+    bubbleSort(P_score , (--i));
+    int k = 1;
+    for (int j = 0; j < i; ++j) {
+        printf("%d- %s\n" , k , P_score[j].name);
+        k++;
+    }
+}
 int main() {
     char name[20];
     char Address_prob[20];
@@ -182,6 +238,7 @@ int main() {
     printf("Please choose :\n");
     printf("[1]Start a new game\n");
     printf("[2]Load saved game\n");
+    printf("[3]Show the scoreboard\n");
     printf("In any part of the game enter -1 to exit the game\n");
     int strchoose;
     scanf("%d" , &strchoose);
@@ -494,7 +551,10 @@ int main() {
             scanf("%d" , &F_choice);
             My_exit(name , head , status , people_effect , court_effect , treasury_effect , F_choice);
         }
-    } else if(strchoose == -1){
+    }else if(strchoose==3){
+        score_board();
+    }
+    else if(strchoose == -1){
         exit(-1);
     }
     else{
