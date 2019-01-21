@@ -42,7 +42,7 @@ void bubbleSort(struct Problem_Score arr[], int n) {
                 if (arr[j].court < arr[j + 1].court) {
                     swap(&(arr[j]), &(arr[j + 1]));
                 } else if (arr[j].court == arr[j + 1].court) {
-                    if (arr[j].court < arr[j + 1].court) {
+                    if (arr[j].treasury < arr[j + 1].treasury) {
                         swap(&(arr[j]), &(arr[j + 1]));
                     }
                 }
@@ -99,7 +99,7 @@ struct problem * Linked_Rand(struct problem * str){//Choose a random problem
     temp = str;
     int cnt = linked_num(str);
     srand(time(NULL));
-    int Rand = ((int)rand())%cnt;
+    int Rand = rand()%cnt;
     for (int i = 0; i < Rand ; ++i) {
         temp = temp->next;
     }
@@ -214,10 +214,12 @@ void score_board(void){
 void file_maker(void){//function for making a custom problem file
     FILE * file_add = fopen("CHOICES.txt" , "a");
     printf("Enter the name of file:\n");
-    char name[20];
+    char name[25];
     scanf("%s" , name);
-    fprintf(file_add , "\r\n%s" , name);
-    FILE * n_add =fopen(name , "wb+");
+    char temp[5] = ".txt";
+    strcat(name , temp);
+    fprintf(file_add , "\n%s" , name);
+    FILE * n_add =fopen(name , "w+");
     printf("Enter the question:\n");
     scanf("\n");
     char question[200];
@@ -291,7 +293,7 @@ int main() {
                 }
                 fclose(Main_File);
             }
-            if(strcmp(holder->prob_def , "\0")==0){//produces an extra node which is deleted
+            if(strcmp(holder->prob_def , "\0")==0){//if produces an extra node it will be deleted
                 delete_node(head , holder);
             }
             Arr_remain = (int *) malloc(sizeof(int) * (--i));
@@ -412,11 +414,7 @@ int main() {
             strcpy(Add, name);
             char plus[] = ".bin";
             strcat(Add, plus);
-            /*if(fopen(Add , "rb")==NULL){
-                printf("There is no saved game.");
-                exit(-1);
-            }*/
-            Load = fopen(Add, "rb+");
+            Load = fopen(Add, "rb");
             if (Load == NULL) {
                 printf("There is no saved game.");
                 exit(-1);
@@ -428,7 +426,7 @@ int main() {
             fread(&people_effect, sizeof(int), 1, Load);
             fread(&court_effect, sizeof(int), 1, Load);
             fread(&treasury_effect, sizeof(int), 1, Load);
-            if (status == 1) {
+            if (status == 1) {//The player hasn't lost yet.
                 struct problem *head;
                 head = create_node();
                 struct problem *holder;
@@ -448,9 +446,11 @@ int main() {
                     }
                     fclose(Main_File);
                 }
-                struct problem *del_node = Check_cnt(head);
-                if (del_node != NULL) {
-                    head = delete_node(head, del_node);
+                while (Check_cnt(head)!= NULL) {
+                    struct problem *del_node = Check_cnt(head);
+                    if (del_node != NULL) {
+                        head = delete_node(head, del_node);
+                    }
                 }
                 printf("People: %d Court: %d Treasury: %d\n", people_effect, court_effect, treasury_effect);
                 int average_effect = (people_effect + court_effect + treasury_effect) / 3;
@@ -547,19 +547,19 @@ int main() {
                 printf("You have lost!\n");
                 printf("Do you want to save the game?\n[1]Yes,I want to save the game.\n[2]No,exit.\n");
                 char F_choice[2];
-            getchar();
-            while (1) {
-                scanf("%s" , F_choice);
-                if (F_choice[0] == '1') {
-                    My_exit(name, head, Arr_remain, status, people_effect, court_effect, treasury_effect,
+                getchar();
+                while (1) {
+                    scanf("%s" , F_choice);
+                    if (F_choice[0] == '1') {
+                        My_exit(name, head, Arr_remain, status, people_effect, court_effect, treasury_effect,
                             F_choice[0]);
-                    printf("The game was saved.");
-                    break;
-                } else if(F_choice[0] == '2' || F_choice[0] == '-'){
-                    exit(-1);
-                } else if(!(F_choice[0] == '2' || F_choice[0] == '-')){
-                    printf("No valid input\n");
-                }
+                        printf("The game was saved.");
+                        break;
+                    } else if(F_choice[0] == '2' || F_choice[0] == '-'){
+                        exit(-1);
+                    } else if(!(F_choice[0] == '2' || F_choice[0] == '-')){
+                        printf("No valid input\n");
+                    }
                 }
             } else {//if the player has lost and saved the game
                 int people_effect = 50;
@@ -712,12 +712,12 @@ int main() {
                     fclose(fopen("-1" , "r+"));
                     exit(-1);
                 }
-
+                fclose(fopen(temp , "r+"));
             }
             exit(-1);
         }
         else {
-            printf("Inavalid number\n");
+            printf("Invalid number\n");
         }
     }
     return 0;
